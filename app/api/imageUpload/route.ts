@@ -10,7 +10,7 @@ cloudinary.config({
 
 interface CloudinaryResponse {
     public_id: string;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 export async function POST(req: NextRequest) {
 

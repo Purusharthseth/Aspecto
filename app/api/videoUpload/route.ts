@@ -13,7 +13,7 @@ interface CloudinaryResponse {
     public_id: string;
     bytes: number;
     duration?: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 const prisma = new PrismaClient();
