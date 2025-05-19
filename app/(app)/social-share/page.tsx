@@ -37,7 +37,18 @@ export default function SocialShare() {
 
     const formData = new FormData();
     formData.append("file", file);
-
+    if (uploadedImage) {
+      try {
+        await fetch("/api/deleteImage", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ publicId: uploadedImage }),
+        });
+        console.log("Deleted previous image:", uploadedImage);
+      } catch (err) {
+        console.error("Failed to delete previous image:", err);
+      }
+    }
     try {
       const response = await fetch("api/imageUpload", {
         method: "POST",
@@ -129,7 +140,6 @@ export default function SocialShare() {
                     sizes="100vw"
                     alt="transformed image"
                     crop="fill"
-                    aspectRatio={socialFormats[selectedFormat].aspectRatio}
                     gravity="auto"
                     ref={imageRef}
                     onLoad={() => setIsTransforming(false)}
