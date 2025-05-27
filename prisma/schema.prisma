@@ -10,8 +10,9 @@ datasource db {
 model Video {
   id             String   @id @default(cuid())
   title          String
-  description     String
-  publicId       String
+  description    String
+  publicId       String   @unique
+  userId         String
   originalSize   String
   compressedSize String
   duration       Float
