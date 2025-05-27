@@ -4,35 +4,34 @@ import { NextResponse } from 'next/server';
 const isPublicRoute = createRouteMatcher([
   '/sign-in',
   '/sign-up',
-  '/',
-  '/home'
-])
-const isPublicApiRoute = createRouteMatcher(['/api/videos',])
+  '/'
+]);
+const isPublicApiRoute = createRouteMatcher(['/api/videos']);
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId } = await auth();
-  const currentUrl = new URL(req.url)
-  const isAccessingDashboard = currentUrl.pathname === "/home"
-  const isApiRequest = currentUrl.pathname.startsWith("/api")
+  const currentUrl = new URL(req.url);
+  const pathname = currentUrl.pathname;
+
+  const isAccessingDashboard = ["/home", "/video-upload", "/social-share"].includes(pathname);
+  const isApiRequest = pathname.startsWith("/api");
 
   if (userId && isPublicRoute(req) && !isAccessingDashboard) {
-    return NextResponse.redirect(new URL("/home", req.url))
+    return NextResponse.redirect(new URL("/home", req.url));
   }
-  if(!userId){
-    if(!isPublicApiRoute(req) && !isPublicApiRoute)  
-      return NextResponse.redirect(new URL("/sign-in", req.url))
-    else if(isApiRequest && !isPublicApiRoute){
-      return NextResponse.redirect(new URL("/signin", req.url))
+
+  if (!userId && !isPublicRoute(req)) {
+    if (!isPublicApiRoute(req)) {
+      return NextResponse.redirect(new URL("/sign-in", req.url));
     }
   }
 
   return NextResponse.next();
-})
+});
+
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-}
+};

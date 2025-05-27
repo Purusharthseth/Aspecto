@@ -32,6 +32,7 @@ const VideoCard: React.FC<VideoCardProps> =({video, onDownload}) =>{
     const getVideoUrl = useCallback((publicId: string) => {
         return getCldVideoUrl({
             src: publicId,
+            format: "mp4",
             width: 1920,
             height: 1080 ,
         });
