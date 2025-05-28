@@ -24,11 +24,13 @@ export async function DELETE(req: NextRequest) {
     console.log("Cloudinary deletion result:", result);
     // Delete from Prisma DB
     await prisma.video.delete({
-      where: { id },
+      where: { id: id },
     });
     return NextResponse.json({ success: true, result });
   } catch (error) {
     console.error("Upload delete failed", error);
     return NextResponse.json({ error: 'Failed to delete image' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

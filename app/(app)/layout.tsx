@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -15,15 +14,11 @@ import {
 
 const sidebarItems = [
   { href: "/home", icon: House, label: "Home Page" },
-  { href: "/social-share", icon: Share2Icon, label: "Social Share" },
+  { href: "/image-upload", icon: UploadIcon, label: "Image Upload" },
   { href: "/video-upload", icon: UploadIcon, label: "Video Upload" },
 ];
 
-export default function AppLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function AppLayout({ children,}: Readonly<{children: React.ReactNode;}>) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();

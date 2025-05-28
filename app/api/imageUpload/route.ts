@@ -34,7 +34,9 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(bytes); 
         const result = await new Promise<CloudinaryResponse>((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-                {folder: 'aspecto'},
+                {folder: 'aspecto',
+                    eager_async: true,
+                },
                 ( err, res)=>{
                     if (err) reject(err);
                     else resolve(res as CloudinaryResponse);
@@ -45,14 +47,14 @@ export async function POST(req: NextRequest) {
 
         const image = await prisma.image.create({
             data: { 
-                publicId: result.public_id,
+                id: result.public_id,
                 userId: userId,
                 originalSize: originalSize,
                 compressedSize:String( result.bytes),
             }
         });
 
-        return NextResponse.json({publicId: result.public_id}, {status: 200});
+        return NextResponse.json({id: result.public_id}, {status: 200});
 
     } catch (error) {
         console.log("Upload image failed", error);

@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
             data: { 
                 title,
                 description,
-                publicId: result.public_id,
+                id: result.public_id,
                 userId: userId,
                 originalSize: originalSize,
                 compressedSize:String( result.bytes),

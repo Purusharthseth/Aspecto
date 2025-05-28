@@ -17,8 +17,10 @@ export default clerkMiddleware(async (auth, req) => {
   const isApiRequest = pathname.startsWith("/api");
 
   if (userId && isPublicRoute(req) && !isAccessingDashboard) {
-    return NextResponse.redirect(new URL("/home", req.url));
+    return NextResponse.redirect(new URL("/home/videos", req.url));
   }
+  
+  if(userId && pathname === "/home")  return NextResponse.redirect(new URL("/home/videos", req.url));
 
   if (!userId && !isPublicRoute(req)) {
     if (!isPublicApiRoute(req)) {

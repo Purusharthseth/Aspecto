@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, use } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { getCldImageUrl, getCldVideoUrl } from "next-cloudinary";
 import { ArrowDownToLine, File, Clock, Trash2 } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { filesize } from "filesize";
 import { Video } from "@prisma/client";
-import axios from "axios";
 
 dayjs.extend(relativeTime);
 
@@ -97,7 +96,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
             </div>
           ) : (
             <video
-              src={getPriviewVideoUrl(video.publicId)}
+              src={getPriviewVideoUrl(video.id)}
               autoPlay
               muted
               loop
@@ -107,7 +106,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
           )
         ) : (
           <img
-            src={getThumbnailUrl(video.publicId)}
+            src={getThumbnailUrl(video.id)}
             alt={video.title}
             className="w-full h-full object-cover"
           />
@@ -150,7 +149,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
             <button
               className="btn btn-primary btn-sm mx-4"
               onClick={() =>
-                onDownload(getVideoUrl(video.publicId), video.title)
+                onDownload(getVideoUrl(video.id), video.title)
               }
             >
               <ArrowDownToLine size={16} />

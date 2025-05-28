@@ -9,3 +9,13 @@ export interface Video {
     createdAt: Date
     updatedAt: Date
 }
+
+export interface Image {
+  id: string;
+  publicId: string;
+  userId: string;
+  originalSize: string;
+  compressedSize: string;
+  createdAt: Date;
+  updatedAt: Date;
+}

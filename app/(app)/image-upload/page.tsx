@@ -29,7 +29,7 @@ export default function ImageUpload() {
       if (response.status !== 200) {
         throw new Error(`Upload failed with status ${response.status}`);
       }
-      Router.push("/");
+      Router.push("/home/images");
     } catch (error) {
       console.error("Upload failed:", error);
     } finally {
