@@ -24,9 +24,6 @@ export async function POST(req: NextRequest) {
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-        if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-            return NextResponse.json({ error: 'Cloudinary credentials are not set' }, { status: 500 });
-        }
 
         const formData = await req.formData();
         const title = formData.get('title') as string;
@@ -51,6 +48,7 @@ export async function POST(req: NextRequest) {
                 })
             uploadStream.end(buffer);
         })
+        
         const video = await prisma.video.create({
             data: { 
                 title,

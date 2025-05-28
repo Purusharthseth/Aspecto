@@ -37,6 +37,7 @@ export default function SocialShare() {
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("originalSize", file.size.toString());
     if (uploadedImage) {
       try {
         await fetch("/api/deleteImage", {
