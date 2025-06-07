@@ -51,11 +51,10 @@ function HomeVideos() {
 
   const onDelete = async (id: string) => {
     try {
-      setVideos((prev) => prev.filter((video) => video.id !== id)); // Optimistic update
       await axios.delete(`/api/deleteVideo`, { data: { id } });
+      setVideos((prev) => prev.filter((video) => video.id !== id)); 
     } catch (error) {
       setError("Failed to delete video. Please try again.");
-      fetchVideos(); // Revert if failed
     }
   };
 

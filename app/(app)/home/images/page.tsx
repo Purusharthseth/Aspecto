@@ -3,9 +3,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Image } from "@prisma/client";
 import ImageCard from "@/components/ImageCard";
+import Editpage from "@/components/Editpage";
 
 function HomeImages() {
   const [images, setImages] = useState<Image[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,15 +48,16 @@ function HomeImages() {
 
   const onDelete = async (id: string) => {
     try {
-      setImages((prevImages) => prevImages.filter((img) => img.id !== id)); // Optimistic update
       await axios.delete(`/api/deleteImage`, { data: { id } });
+      setImages((prevImages) => prevImages.filter((img) => img.id !== id));
     } catch (error) {
       setError("Failed to delete image. Please try again.");
-      fetchImages(); // Revert if failed
     }
   };
 
-  const onEdit = async (id: string) => {};
+  const onEdit = async (id: string) => {
+    setEditId(id);
+  };
 
   if (loading) {
     // Skeleton loader grid (like videos)
@@ -69,6 +72,8 @@ function HomeImages() {
       </div>
     );
   }
+
+  if(editId) return <Editpage editId={editId} setEditId={setEditId} />;
 
   return (
     <div className="container mx-auto p-4">
