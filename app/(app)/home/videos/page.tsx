@@ -48,25 +48,27 @@ function HomeVideos() {
       alert("Download failed. Check browser console for more info.");
     }
   }, []);
-    const onDelete = async (id: string) => {
-      try {
-        setLoading(true);
-        const response = await axios.delete(`/api/deleteVideo`, {
-          data: { id },
-        });
-        if(response.data.success) {
-          setVideos((prevVideos) => prevVideos.filter((video) => video.id !== id));
-        }
-      } catch (error) {
-        console.error("Error deleting video:", error);
-        alert("Failed to delete video. Please try again.");
-      } finally { setLoading(false);}
-    };  
+
+  const onDelete = async (id: string) => {
+    try {
+      setVideos((prev) => prev.filter((video) => video.id !== id)); // Optimistic update
+      await axios.delete(`/api/deleteVideo`, { data: { id } });
+    } catch (error) {
+      setError("Failed to delete video. Please try again.");
+      fetchVideos(); // Revert if failed
+    }
+  };
 
   if (loading) {
+    // Skeleton loader grid
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary"></div>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Videos</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="animate-pulse bg-base-200 h-64 rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -74,6 +76,9 @@ function HomeVideos() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Videos</h1>
+      {error && (
+        <div className="text-center text-red-500 mb-4">{error}</div>
+      )}
       {videos.length === 0 ? (
         <div className="text-center text-lg text-gray-500">
           No videos available
@@ -94,4 +99,4 @@ function HomeVideos() {
   );
 }
 
-export default HomeVideos
+export default HomeVideos;

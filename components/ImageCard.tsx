@@ -18,26 +18,17 @@ interface ImageCardProps {
 const ImageCard: React.FC<ImageCardProps> = ({ image, onDownload, onDelete, onEdit }) => {
   const [wannaDelete, setWannaDelete] = useState(false);
 
- const getImageUrl = useCallback(
-  (id: string) => {
-    return getCldImageUrl({
-      src: id,
-    });
-  },
-  [] 
-);
+  const getImageUrl = useCallback(
+    (id: string) => {
+      return getCldImageUrl({
+        src: id,
+      });
+    },
+    []
+  );
 
   const formatSize = useCallback((size: number) => {
     return filesize(size);
-  }, []);
-
-  const formatDuration = useCallback((duration: number) => {
-    const seconds = Math.floor(duration % 60);
-    const minutes = Math.floor((duration / 60) % 60);
-    const hours = Math.floor(duration / 3600);
-    return `${hours > 0 ? `${hours}h ` : ""}${
-      minutes > 0 ? `${minutes}m ` : ""
-    }${seconds}s`;
   }, []);
 
   const CompressionPercentage = Math.round(
@@ -45,13 +36,12 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onDownload, onDelete, onEd
   );
 
   return (
-    <div
-      className="card bg-base-200 shadow-xl hover:shadow-2xl transition-all duration-300"
-    >
+    <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-all duration-300">
       <figure className="aspect-video relative">
         <img
           src={getImageUrl(image.id)}
           className="w-full h-full object-cover"
+          loading="lazy"
         />
       </figure>
       <div className="card-body p-4">
@@ -60,7 +50,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onDownload, onDelete, onEd
         </p>
         <div className="flex justify-between items-center">
           <div className="text-sm font-semibold">
-           <button
+            <button
               className="btn btn-outline btn-sm"
               onClick={() => onEdit(image.id)}
               title="Edit"

@@ -8,14 +8,14 @@ function HomeImages() {
   const [images, setImages] = useState<Image[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const fetchImages = useCallback(async () => {
     try {
       const response = await axios.get("/api/images");
       setImages(response.data);
-      console.log(response.data);
     } catch (error) {
       console.log(error);
-      setError("Failed to fetch Title");
+      setError("Failed to fetch images");
     } finally {
       setLoading(false);
     }
@@ -24,20 +24,16 @@ function HomeImages() {
   useEffect(() => {
     fetchImages();
   }, [fetchImages]);
+
   const handleDownload = useCallback(async (url: string) => {
     try {
       const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = `aspecto.png`; // You can replace this with a dynamic filename if needed
+      link.download = `aspecto.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -49,32 +45,37 @@ function HomeImages() {
   }, []);
 
   const onDelete = async (id: string) => {
-      try {
-        setLoading(true);
-        const response = await axios.delete(`/api/deleteImage`, {
-          data: { id },
-        });
-        if(response.data.success) {
-          setImages((prevImages) => prevImages.filter((images) => images.id !== id));
-        }
-      } catch (error) {
-        console.error("Error deleting video:", error);
-        alert("Failed to delete video. Please try again.");
-      } finally { setLoading(false);}
-    };  
-    
+    try {
+      setImages((prevImages) => prevImages.filter((img) => img.id !== id)); // Optimistic update
+      await axios.delete(`/api/deleteImage`, { data: { id } });
+    } catch (error) {
+      setError("Failed to delete image. Please try again.");
+      fetchImages(); // Revert if failed
+    }
+  };
+
   const onEdit = async (id: string) => {};
 
   if (loading) {
+    // Skeleton loader grid (like videos)
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-primary"></div>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Images</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="animate-pulse bg-base-200 h-64 rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Images</h1>
+      {error && (
+        <div className="text-center text-red-500 mb-4">{error}</div>
+      )}
       {images.length === 0 ? (
         <div className="text-center text-lg text-gray-500">
           No image available

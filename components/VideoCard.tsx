@@ -19,9 +19,10 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
   const [previewError, setPreviewError] = useState(false);
   const [wannaDelete, setWannaDelete] = useState(false);
 
+  // Memoized, no dependency on video (use video.id as argument)
   const getThumbnailUrl = useCallback(
-    (publicId: string) => {
-      return getCldImageUrl({
+    (publicId: string) =>
+      getCldImageUrl({
         src: publicId,
         width: 400,
         height: 225,
@@ -29,46 +30,38 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
         quality: "auto",
         format: "jpg",
         assetType: "video",
-      });
-    },
-    [video]
+      }),
+    []
   );
 
   const getVideoUrl = useCallback(
-    (publicId: string) => {
-      return getCldVideoUrl({
+    (publicId: string) =>
+      getCldVideoUrl({
         src: publicId,
         format: "mp4",
         width: 1920,
         height: 1080,
-      });
-    },
-    [video]
+      }),
+    []
   );
 
-  const getPriviewVideoUrl = useCallback(
-    (publicId: string) => {
-      return getCldVideoUrl({
+  const getPreviewVideoUrl = useCallback(
+    (publicId: string) =>
+      getCldVideoUrl({
         src: publicId,
         width: 400,
         height: 225,
         rawTransformations: ["e_preview:duration_15:max_seg_9:min_seg_dur_1"],
-      });
-    },
-    [video]
+      }),
+    []
   );
 
-  const formatSize = useCallback((size: number) => {
-    return filesize(size);
-  }, []);
-
+  const formatSize = useCallback((size: number) => filesize(size), []);
   const formatDuration = useCallback((duration: number) => {
     const seconds = Math.floor(duration % 60);
     const minutes = Math.floor((duration / 60) % 60);
     const hours = Math.floor(duration / 3600);
-    return `${hours > 0 ? `${hours}h ` : ""}${
-      minutes > 0 ? `${minutes}m ` : ""
-    }${seconds}s`;
+    return `${hours > 0 ? `${hours}h ` : ""}${minutes > 0 ? `${minutes}m ` : ""}${seconds}s`;
   }, []);
 
   const CompressionPercentage = Math.round(
@@ -78,9 +71,8 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
   useEffect(() => {
     setPreviewError(false);
   }, [isHovered]);
-  const handlePreviewError = () => {
-    setPreviewError(true);
-  };
+
+  const handlePreviewError = () => setPreviewError(true);
 
   return (
     <div
@@ -96,12 +88,14 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
             </div>
           ) : (
             <video
-              src={getPriviewVideoUrl(video.id)}
+              src={getPreviewVideoUrl(video.id)}
               autoPlay
               muted
               loop
               className="w-full h-full object-cover"
               onError={handlePreviewError}
+              poster={getThumbnailUrl(video.id)}
+              preload="none"
             />
           )
         ) : (
@@ -109,6 +103,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
             src={getThumbnailUrl(video.id)}
             alt={video.title}
             className="w-full h-full object-cover"
+            loading="lazy"
           />
         )}
         <div className="absolute bottom-2 right-2 bg-base-100 bg-opacity-70 px-2 py-1 rounded-lg text-sm flex items-center">
@@ -148,6 +143,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
           <div>
             <button
               className="btn btn-primary btn-sm mx-4"
+              aria-label="Download video"
               onClick={() =>
                 onDownload(getVideoUrl(video.id), video.title)
               }
@@ -156,9 +152,8 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, onDownload, onDelete }) =>
             </button>
             <button
               className="btn btn-error btn-sm"
-              onClick={() => {
-                setWannaDelete(true);
-              }}
+              aria-label="Delete video"
+              onClick={() => setWannaDelete(true)}
             >
               <Trash2 size={16} />
             </button>
