@@ -34,6 +34,8 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
   const [bgPrompt, setBgPrompt] = useState("");
   const [removeBg, setRemoveBg] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   const [injectedBgPrompt, setInjectedBgPrompt] = useState("");
   const [removePrompt, setRemovePrompt] = useState("");
   const [injectedRemovePrompt, setInjectedRemovePrompt] = useState("");
@@ -41,10 +43,16 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
   const [replacePrompt2, setReplacePrompt2] = useState("");
   const [injectedReplacePrompt1, setInjectedReplacePrompt1] = useState("");
   const [injectedReplacePrompt2, setInjectedReplacePrompt2] = useState("");
-  const [originalDimensions, setOriginalDimensions] = useState({ width: 1200, height: 800 });
+
+  const [downloading, setDownloading] = useState(false);
+  const [downloadCountdown, setDownloadCountdown] = useState(0);
+  const [originalDimensions, setOriginalDimensions] = useState({
+    width: 1200,
+    height: 800,
+  });
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Add function to get original image dimensions
+  // Retrieve original image dimensions
   const getOriginalDimensions = (editId: string) => {
     const img = new Image();
     img.onload = () => {
@@ -52,63 +60,74 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
     };
     img.src = `https://res.cloudinary.com/mycloud/image/upload/${editId}`;
   };
-  
 
-  // Call getOriginalDimensions when editId changes
   useEffect(() => {
-    if (editId) {
-      getOriginalDimensions(editId);
-    }
+    if (editId) getOriginalDimensions(editId);
   }, [editId]);
 
-  // Handle "Change Background" button click
-  const handleChangeBg = () => {
-    setProcessing(true);
-    setInjectedBgPrompt(bgPrompt);
-  };
-
-  // Handle "Remove Background" button click
-  const handleRemoveBg = () => {
-    setRemoveBg(!removeBg);
-    setProcessing(true);
-  };
-
-  // Handle "Generative Remove" button click
-  const handleGenerativeRemove = () => {
-    setInjectedRemovePrompt(removePrompt);
-    setProcessing(true);
-  };
-
+  // Reset states when edit type changes
   useEffect(() => {
-    setProcessing(true);
+    setProcessing(false);
+    setImageLoaded(false);
   }, [selectedEdit]);
+
+  // Countdown logic for download cooldown
+  useEffect(() => {
+    if (downloading && downloadCountdown > 0) {
+      const timer = setTimeout(() => {
+        setDownloadCountdown((prev) => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+    if (downloading && downloadCountdown === 0) {
+      setDownloading(false);
+    }
+  }, [downloading, downloadCountdown]);
 
   const handleDownload = async () => {
     if (!imageRef.current) return;
-    fetch(imageRef.current.src)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `aspecto.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      })
-      .catch((error) => {
-        console.error("Error downloading image:", error);
-        alert(
-          "An error occurred while downloading the image. Please try again."
-        );
-      });
+    setDownloading(true);
+    setDownloadCountdown(60);
+    try {
+      const res = await fetch(imageRef.current.src);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `aspecto.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download error:", error);
+      alert("Failed to download. Please try again.");
+    }
+  };
+
+  const handleChangeBg = () => {
+    setProcessing(true);
+    setImageLoaded(false);
+    setInjectedBgPrompt(bgPrompt);
+  };
+
+  const handleRemoveBg = () => {
+    setRemoveBg(!removeBg);
+    setProcessing(true);
+    setImageLoaded(false);
+  };
+
+  const handleGenerativeRemove = () => {
+    setInjectedRemovePrompt(removePrompt);
+    setProcessing(true);
+    setImageLoaded(false);
   };
 
   const handleGenerativeReplace = () => {
     setInjectedReplacePrompt1(replacePrompt1);
     setInjectedReplacePrompt2(replacePrompt2);
     setProcessing(true);
+    setImageLoaded(false);
   };
 
   return (
@@ -120,31 +139,35 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
         <h1 className="text-2xl font-bold ml-4">Edit Image</h1>
       </div>
 
-      {/* Edit Option Dropdown */}
+      {/* Edit Options */}
       <div className="mb-4">
         <label className="font-semibold mr-2">Edit Option:</label>
         <select
           className="select select-bordered"
           value={selectedEdit}
-          onChange={e => setSelectedEdit(e.target.value)}
+          onChange={(e) => setSelectedEdit(e.target.value)}
         >
-          {editOptions.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          {editOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
           ))}
         </select>
       </div>
 
-      {/* Show controls based on selected edit */}
+      {/* Conditional Inputs */}
       {selectedEdit === "aspect" && (
         <div className="mb-4">
           <label className="font-semibold mr-2">Aspect Ratio:</label>
           <select
             className="select select-bordered"
             value={aspect}
-            onChange={e => setAspect(e.target.value as SocialFormat)}
+            onChange={(e) => setAspect(e.target.value as SocialFormat)}
           >
             {Object.keys(socialFormats).map((key) => (
-              <option key={key} value={key}>{key}</option>
+              <option key={key} value={key}>
+                {key}
+              </option>
             ))}
           </select>
         </div>
@@ -169,7 +192,7 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
             className="input input-bordered flex-1"
             placeholder="Describe new background..."
             value={bgPrompt}
-            onChange={e => setBgPrompt(e.target.value)}
+            onChange={(e) => setBgPrompt(e.target.value)}
             disabled={processing}
           />
           <button
@@ -181,7 +204,7 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
           </button>
         </div>
       )}
-      {/* Generative Remove */}
+
       {selectedEdit === "remv" && (
         <div className="mb-4 flex items-center space-x-2">
           <input
@@ -189,7 +212,7 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
             className="input input-bordered flex-1"
             placeholder="Describe what to remove"
             value={removePrompt}
-            onChange={e => setRemovePrompt(e.target.value)}
+            onChange={(e) => setRemovePrompt(e.target.value)}
             disabled={processing}
           />
           <button
@@ -201,6 +224,7 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
           </button>
         </div>
       )}
+
       {selectedEdit === "repl" && (
         <div className="mb-4 flex items-center space-x-2">
           <input
@@ -208,15 +232,15 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
             className="input input-bordered flex-1"
             placeholder="Describe what to replace"
             value={replacePrompt1}
-            onChange={e => setReplacePrompt1(e.target.value)}
+            onChange={(e) => setReplacePrompt1(e.target.value)}
             disabled={processing}
           />
-           <input
+          <input
             type="text"
             className="input input-bordered flex-1"
             placeholder="Describe what to replace with"
             value={replacePrompt2}
-            onChange={e => setReplacePrompt2(e.target.value)}
+            onChange={(e) => setReplacePrompt2(e.target.value)}
             disabled={processing}
           />
           <button
@@ -229,15 +253,15 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
         </div>
       )}
 
-
-      {/* Image Preview */}
+      {/* Image Display & Download */}
       <div className="mb-4">
         <div className="relative">
-          {(processing) && (
-            <div className="absolute inset-0 flex items-center justify-center bg-base-100 bg-opacity-50 z-10">
-              <span className="loading loading-spinner loading-lg"></span>
-            </div>
-          )}
+          {(processing && !imageLoaded) && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-base-100 bg-opacity-50 z-10">
+            <progress className="progress w-56 progress-accent"></progress>
+            <p className="text-accent mt-2">Processing image...</p>
+          </div>
+        )}
           <CldImage
             src={editId || ""}
             alt="Edited image"
@@ -253,26 +277,51 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
                 ? socialFormats[aspect].height
                 : originalDimensions.height
             }
-            removeBackground={selectedEdit === "removeBg" && removeBg ? true : undefined}
-            replaceBackground={selectedEdit === "changeBg" && injectedBgPrompt ? injectedBgPrompt : undefined}
-            remove={selectedEdit === "remv" && injectedRemovePrompt ? { prompt: injectedBgPrompt, removeShadow: true } : undefined}
-           replace={
-              selectedEdit === "repl" && injectedReplacePrompt1 && injectedReplacePrompt2
+            removeBackground={
+              selectedEdit === "removeBg" && removeBg ? true : undefined
+            }
+            replaceBackground={
+              selectedEdit === "changeBg" && injectedBgPrompt
+                ? injectedBgPrompt
+                : undefined
+            }
+            remove={
+              selectedEdit === "remv" && injectedRemovePrompt
+                ? { prompt: injectedRemovePrompt, removeShadow: true }
+                : undefined
+            }
+            replace={
+              selectedEdit === "repl" &&
+              injectedReplacePrompt1 &&
+              injectedReplacePrompt2
                 ? [injectedReplacePrompt1, injectedReplacePrompt2]
                 : undefined
             }
             sizes="100vw"
-            onLoad={() => setProcessing(false)}
+            onLoad={() => {
+              setProcessing(false);
+              setImageLoaded(true);
+            }}
+            onError={() => {
+              setProcessing(false);
+              setImageLoaded(true);
+            }}
             className="max-w-full rounded-lg border"
             ref={imageRef}
           />
 
-          {!(processing) && (
-             <div className="card-actions justify-end mt-6">
-            <button className="btn btn-primary" onClick={handleDownload}>
-            Download
-          </button>
-          </div>
+          {imageLoaded && (
+            <div className="card-actions justify-end mt-6">
+              <button
+                className="btn btn-primary"
+                onClick={handleDownload}
+                disabled={downloading}
+              >
+                {downloading
+                  ? `Try again in ${downloadCountdown} seconds`
+                  : "Download"}
+              </button>
+            </div>
           )}
         </div>
       </div>
