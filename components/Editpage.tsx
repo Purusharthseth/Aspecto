@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 
@@ -31,22 +31,26 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
   const [aspect, setAspect] = useState<SocialFormat>("Instagram Square (1:1)");
   const [bgPrompt, setBgPrompt] = useState("");
   const [removeBg, setRemoveBg] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [originalDimensions, setOriginalDimensions] = useState({ width: 1200, height: 800 });
+  const imageRef = useRef<HTMLImageElement>(null);
 
-  if (!editId) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="flex items-center justify-start mb-4">
-          <button onClick={() => setEditId(null)} className="btn btn-ghost">
-            <ChevronLeft />
-          </button>
-          <h1 className="text-2xl font-bold ml-4">Edit Image</h1>
-        </div>
-        <div className="alert alert-error">No image selected for editing</div>
-      </div>
-    );
-  }
+  // Add function to get original image dimensions
+  const getOriginalDimensions = (editId: string) => {
+    const img = new Image();
+    img.onload = () => {
+      setOriginalDimensions({ width: img.width, height: img.height });
+    };
+    img.src = `https://res.cloudinary.com/mycloud/image/upload/${editId}`;
+  };
+  
+
+  // Call getOriginalDimensions when editId changes
+  React.useEffect(() => {
+    if (editId) {
+      getOriginalDimensions(editId);
+    }
+  }, [editId]);
 
   // Handle "Change Background" button click
   const handleChangeBg = () => {
@@ -59,7 +63,27 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
     setProcessing(true);
   };
 
-  
+  const handleDownload = async () => {
+    if (!imageRef.current) return;
+    fetch(imageRef.current.src)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `aspecto.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      })
+      .catch((error) => {
+        console.error("Error downloading image:", error);
+        alert(
+          "An error occurred while downloading the image. Please try again."
+        );
+      });
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -135,37 +159,40 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
       {/* Image Preview */}
       <div className="mb-4">
         <div className="relative">
-          {(loading || processing) && (
+          {(processing) && (
             <div className="absolute inset-0 flex items-center justify-center bg-base-100 bg-opacity-50 z-10">
               <span className="loading loading-spinner loading-lg"></span>
             </div>
           )}
           <CldImage
-  src={editId}
-  alt="Edited image"
-  crop={selectedEdit === "aspect" ? "fill" : undefined}
-  gravity="auto"
-  width={
-    selectedEdit === "aspect"
-      ? socialFormats[aspect].width
-      : (selectedEdit === "changeBg" || selectedEdit === "removeBg")
-        ? 1200 // fallback width
-        : undefined
-  }
-  height={
-    selectedEdit === "aspect"
-      ? socialFormats[aspect].height
-      : (selectedEdit === "changeBg" || selectedEdit === "removeBg")
-        ? 675 // fallback height (adjust to match your content)
-        : undefined
-  }
-  removeBackground={selectedEdit === "removeBg" && removeBg ? true : undefined}
-  replaceBackground={selectedEdit === "changeBg" && bgPrompt ? bgPrompt : undefined}
-  sizes="100vw"
-  onLoad={() => setProcessing(false)}
-  className="max-w-full rounded-lg border"
-/>
-
+            src={editId || ""}
+            alt="Edited image"
+            crop={selectedEdit === "aspect" ? "fill" : undefined}
+            gravity="auto"
+            width={
+              selectedEdit === "aspect"
+                ? socialFormats[aspect].width
+                : originalDimensions.width
+            }
+            height={
+              selectedEdit === "aspect"
+                ? socialFormats[aspect].height
+                : originalDimensions.height
+            }
+            removeBackground={selectedEdit === "removeBg" && removeBg ? true : undefined}
+            replaceBackground={selectedEdit === "changeBg" && bgPrompt ? bgPrompt : undefined}
+            sizes="100vw"
+            onLoad={() => setProcessing(false)}
+            className="max-w-full rounded-lg border"
+            ref={imageRef}
+          />
+          {!(processing) && (
+             <div className="card-actions justify-end mt-6">
+            <button className="btn btn-primary" onClick={handleDownload}>
+            Download
+          </button>
+          </div>
+          )}
         </div>
       </div>
     </div>
