@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { CldImage } from "next-cloudinary";
 
@@ -19,6 +19,8 @@ const editOptions = [
   { label: "Change Aspect Ratio", value: "aspect" },
   { label: "Remove Background", value: "removeBg" },
   { label: "Change Background", value: "changeBg" },
+  { label: "Generative Remove", value: "remv" },
+  { label: "Generative Replace", value: "repl" },
 ];
 
 interface EditpageProps {
@@ -32,6 +34,13 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
   const [bgPrompt, setBgPrompt] = useState("");
   const [removeBg, setRemoveBg] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [injectedBgPrompt, setInjectedBgPrompt] = useState("");
+  const [removePrompt, setRemovePrompt] = useState("");
+  const [injectedRemovePrompt, setInjectedRemovePrompt] = useState("");
+  const [replacePrompt1, setReplacePrompt1] = useState("");
+  const [replacePrompt2, setReplacePrompt2] = useState("");
+  const [injectedReplacePrompt1, setInjectedReplacePrompt1] = useState("");
+  const [injectedReplacePrompt2, setInjectedReplacePrompt2] = useState("");
   const [originalDimensions, setOriginalDimensions] = useState({ width: 1200, height: 800 });
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -46,7 +55,7 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
   
 
   // Call getOriginalDimensions when editId changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (editId) {
       getOriginalDimensions(editId);
     }
@@ -55,6 +64,7 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
   // Handle "Change Background" button click
   const handleChangeBg = () => {
     setProcessing(true);
+    setInjectedBgPrompt(bgPrompt);
   };
 
   // Handle "Remove Background" button click
@@ -62,6 +72,16 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
     setRemoveBg(!removeBg);
     setProcessing(true);
   };
+
+  // Handle "Generative Remove" button click
+  const handleGenerativeRemove = () => {
+    setInjectedRemovePrompt(removePrompt);
+    setProcessing(true);
+  };
+
+  useEffect(() => {
+    setProcessing(true);
+  }, [selectedEdit]);
 
   const handleDownload = async () => {
     if (!imageRef.current) return;
@@ -83,6 +103,12 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
           "An error occurred while downloading the image. Please try again."
         );
       });
+  };
+
+  const handleGenerativeReplace = () => {
+    setInjectedReplacePrompt1(replacePrompt1);
+    setInjectedReplacePrompt2(replacePrompt2);
+    setProcessing(true);
   };
 
   return (
@@ -155,6 +181,54 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
           </button>
         </div>
       )}
+      {/* Generative Remove */}
+      {selectedEdit === "remv" && (
+        <div className="mb-4 flex items-center space-x-2">
+          <input
+            type="text"
+            className="input input-bordered flex-1"
+            placeholder="Describe what to remove"
+            value={removePrompt}
+            onChange={e => setRemovePrompt(e.target.value)}
+            disabled={processing}
+          />
+          <button
+            className="btn btn-info"
+            onClick={handleGenerativeRemove}
+            disabled={!removePrompt || processing}
+          >
+            Remove
+          </button>
+        </div>
+      )}
+      {selectedEdit === "repl" && (
+        <div className="mb-4 flex items-center space-x-2">
+          <input
+            type="text"
+            className="input input-bordered flex-1"
+            placeholder="Describe what to replace"
+            value={replacePrompt1}
+            onChange={e => setReplacePrompt1(e.target.value)}
+            disabled={processing}
+          />
+           <input
+            type="text"
+            className="input input-bordered flex-1"
+            placeholder="Describe what to replace with"
+            value={replacePrompt2}
+            onChange={e => setReplacePrompt2(e.target.value)}
+            disabled={processing}
+          />
+          <button
+            className="btn btn-info"
+            onClick={handleGenerativeReplace}
+            disabled={!replacePrompt1 || !replacePrompt2 || processing}
+          >
+            Replace
+          </button>
+        </div>
+      )}
+
 
       {/* Image Preview */}
       <div className="mb-4">
@@ -180,12 +254,19 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
                 : originalDimensions.height
             }
             removeBackground={selectedEdit === "removeBg" && removeBg ? true : undefined}
-            replaceBackground={selectedEdit === "changeBg" && bgPrompt ? bgPrompt : undefined}
+            replaceBackground={selectedEdit === "changeBg" && injectedBgPrompt ? injectedBgPrompt : undefined}
+            remove={selectedEdit === "remv" && injectedRemovePrompt ? { prompt: injectedBgPrompt, removeShadow: true } : undefined}
+           replace={
+              selectedEdit === "repl" && injectedReplacePrompt1 && injectedReplacePrompt2
+                ? [injectedReplacePrompt1, injectedReplacePrompt2]
+                : undefined
+            }
             sizes="100vw"
             onLoad={() => setProcessing(false)}
             className="max-w-full rounded-lg border"
             ref={imageRef}
           />
+
           {!(processing) && (
              <div className="card-actions justify-end mt-6">
             <button className="btn btn-primary" onClick={handleDownload}>
