@@ -35,7 +35,6 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
   const [removeBg, setRemoveBg] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-
   const [injectedBgPrompt, setInjectedBgPrompt] = useState("");
   const [removePrompt, setRemovePrompt] = useState("");
   const [injectedRemovePrompt, setInjectedRemovePrompt] = useState("");
@@ -67,9 +66,10 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
 
   // Reset states when edit type changes
   useEffect(() => {
-    setProcessing(false);
+      console.log("[useEffect] Triggered - selectedEdit:", selectedEdit, "editId:", editId);
+    setProcessing(true);
     setImageLoaded(false);
-  }, [selectedEdit]);
+  }, [selectedEdit, editId]);
 
   // Countdown logic for download cooldown
   useEffect(() => {
@@ -162,7 +162,11 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
           <select
             className="select select-bordered"
             value={aspect}
-            onChange={(e) => setAspect(e.target.value as SocialFormat)}
+            onChange={(e) => {
+              setAspect(e.target.value as SocialFormat);
+              setProcessing(true);
+              setImageLoaded(false);
+            }}
           >
             {Object.keys(socialFormats).map((key) => (
               <option key={key} value={key}>
@@ -256,17 +260,17 @@ const Editpage: React.FC<EditpageProps> = ({ editId, setEditId }) => {
       {/* Image Display & Download */}
       <div className="mb-4">
         <div className="relative">
-          {(processing && !imageLoaded) && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-base-100 bg-opacity-50 z-10">
-            <progress className="progress w-56 progress-accent"></progress>
-            <p className="text-accent mt-2">Processing image...</p>
-          </div>
-        )}
+          {processing && !imageLoaded && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-base-100 bg-opacity-50 z-10">
+              <progress className="progress w-56 progress-accent"></progress>
+              <p className="text-accent mt-2">Processing image...</p>
+            </div>
+          )}
           <CldImage
             src={editId || ""}
             alt="Edited image"
             crop={selectedEdit === "aspect" ? "fill" : undefined}
-            gravity="auto"
+            gravity={selectedEdit === "aspect" ? "auto" : undefined}
             width={
               selectedEdit === "aspect"
                 ? socialFormats[aspect].width

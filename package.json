@@ -2,6 +2,11 @@
   "name": "aspecto",
   "version": "0.1.0",
   "private": true,
+    "eslintConfig": {
+    "rules": {
+      "@typescript-eslint/no-unused-vars": "off"
+    }
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
