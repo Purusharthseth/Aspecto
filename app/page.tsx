@@ -91,7 +91,7 @@ export default function Home() {
             <div className="carousel-item w-64 md:w-80">
               <div className="card bg-base-200 p-6 shadow-md h-full">
                 <h3 className="text-lg font-semibold mb-2">Replace Object</h3>
-                <p className="text-gray-300">Don't like an object, want it to be replaced? Watch AI do it.</p>
+                <p className="text-gray-300">Don&apos;t like an object, want it to be replaced? Watch AI do it.</p>
               </div>
             </div>
             {/* Feature 6 */}

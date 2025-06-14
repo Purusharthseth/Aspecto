@@ -7,7 +7,6 @@ import {
   LogOutIcon,
   MenuIcon,
   House,
-  Share2Icon,
   UploadIcon,
   ImageIcon,
 } from "lucide-react";

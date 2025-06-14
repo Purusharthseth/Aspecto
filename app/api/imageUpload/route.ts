@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
             uploadStream.end(buffer);
         })
 
-        const image = await prisma.image.create({
+        await prisma.image.create({
             data: { 
                 id: result.public_id,
                 userId: userId,

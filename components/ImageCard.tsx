@@ -3,7 +3,6 @@ import { getCldImageUrl } from "next-cloudinary";
 import { ArrowDownToLine, Trash2, Pencil } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { filesize } from "filesize";
 import { Image } from "@prisma/client";
 
 dayjs.extend(relativeTime);

@@ -54,6 +54,7 @@ function HomeVideos() {
       await axios.delete(`/api/deleteVideo`, { data: { id } });
       setVideos((prev) => prev.filter((video) => video.id !== id)); 
     } catch (error) {
+      console.log(error);
       setError("Failed to delete video. Please try again.");
     }
   };
