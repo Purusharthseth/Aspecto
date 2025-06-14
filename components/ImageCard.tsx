@@ -26,15 +26,6 @@ const ImageCard: React.FC<ImageCardProps> = ({ image, onDownload, onDelete, onEd
     },
     []
   );
-
-  const formatSize = useCallback((size: number) => {
-    return filesize(size);
-  }, []);
-
-  const CompressionPercentage = Math.round(
-    (1 - Number(image.compressedSize) / Number(image.originalSize)) * 100
-  );
-
   return (
     <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-all duration-300">
       <figure className="aspect-video relative">

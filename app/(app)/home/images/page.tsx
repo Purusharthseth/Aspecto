@@ -52,6 +52,7 @@ function HomeImages() {
       setImages((prevImages) => prevImages.filter((img) => img.id !== id));
     } catch (error) {
       setError("Failed to delete image. Please try again.");
+      console.log(error);
     }
   };
 

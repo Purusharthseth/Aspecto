@@ -1,15 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
+import { Github } from 'lucide-react';
 import Link from "next/link";
-  const screenshots = [
-    { label: "Crop & Resize", src: "/ss-crop.png", desc: "Crop and resize images for any platform." },
-    { label: "Remove BG", src: "/ss-removebg.png", desc: "Remove backgrounds in one click." },
-    { label: "Change BG", src: "/ss-changebg.png", desc: "Change backgrounds with AI magic." },
-    { label: "Replace Object", src: "/ss-replace.png", desc: "Replace objects in your images easily." },
-    { label: "Smart Preview", src: "/ss-preview.png", desc: "Preview your video before downloading." },
-  ];
+
+
 export default function Home() {
-  const [selectedTab, setSelectedTab] = useState(1);
+
   return (
     <main className="min-h-screen bg-base-200 text-base-content">
       {/* Navbar */}
@@ -108,34 +104,18 @@ export default function Home() {
           </div>
         </div>
       </section>
-       <section className="max-w-3xl mx-auto mt-16 mb-24 px-2">
-        <div className="tabs tabs-boxed flex justify-center mb-6">
-          {screenshots.map((tabItem, idx) => (
-            <a
-              key={tabItem.label}
-              className={`tab tab-lg tab-bordered ${selectedTab === idx ? "tab-active" : ""}`}
-              onClick={() => setSelectedTab(idx)}
-            >
-              {tabItem.label}
-            </a>
-          ))}
-        </div>
-        <div className="w-full flex flex-col items-center">
-          <img
-            src={screenshots[selectedTab].src}
-            alt={screenshots[selectedTab].label}
-            className="rounded-xl shadow-lg border border-base-300 w-full max-w-xl mb-4"
-          />
-          <p className="text-lg text-base-content">{screenshots[selectedTab].desc}</p>
-        </div>
-      </section>
-
       {/* Footer */}
-      <footer className="footer p-5 bg-base-300 text-neutral-content mt-auto">
+      <Link href="https://github.com/Purusharthseth" target="_blank" rel="nofollow noopener noreferrer"
+      className="footer p-5 bg-base-300 text-neutral-content mt-auto flex justify-between items-center">
         <aside>
-          <p>Aspecto © {new Date().getFullYear()} - All right reserved</p>
+          <span>Aspecto © {new Date().getFullYear()} - All rights reserved</span>
         </aside>
-      </footer>
+        <div className="flex items-center gap-2">
+          <Github />
+          <span>Purusharth Seth</span>
+        </div>
+      </Link>
+
     </main>
   );
 }
