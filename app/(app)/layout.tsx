@@ -55,7 +55,7 @@ export default function AppLayout({ children,}: Readonly<{children: React.ReactN
             </div>
             <div className="flex-1">
               <Link href="/" onClick={handleLogoClick}>
-                <div className="btn btn-ghost normal-case text-2xl font-bold tracking-tight cursor-pointer">
+                <div className="btn btn-ghost normal-case text-2xl font-bold tracking-tight cursor-pointer hidden sm:inline-flex">
                   Aspecto
                 </div>
               </Link>

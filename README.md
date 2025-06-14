@@ -37,6 +37,12 @@
 
 ## 🚀 Getting Started
 
-Clone the repository:
-```bash
-git clone https://github.com/Purusharthseth/Aspecto
+![Landing page](public/Aspecto.png)
+- First login or create account if not created already
+- Then go to uploading image/video, and upload image/video.
+![Upload image](public/Aspecto3.png)
+- Now after uploading image, you can visit home/videos or home/images.
+- In videos you can have a smart preview, delete, and the size by which it has been compressed. This works as your cloud storage.
+- In images you have an edit option with multiple functionalities.
+![image viewing](public/Aspectoss2.png)
+- Then you can perform multiple operations, all powered by AI.
