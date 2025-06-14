@@ -1,6 +1,7 @@
 # 🖼️ Aspecto
 
 **Full-stack Media Management App**
+**deployed at:** https://aspecto-drab.vercel.app/
 
 ---
 
@@ -23,11 +24,11 @@
 ### 🎨 AI-Powered Enhancements
 - Intelligent cropping for optimal social media display  
 - Background removal and generative background replacement  
-- Image and video quality restoration  
+- Object removal and replacement available
+- Smart preview for video
 
 ### 🔐 Secure Authentication
 - Implemented with **Clerk** for seamless sign-up/sign-in  
-- Role-based access and session handling  
 
 ### 💾 Data Management
 - User data stored securely using **Prisma ORM** and **NeonDB**
